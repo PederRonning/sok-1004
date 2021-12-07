@@ -1,20 +1,24 @@
+---
+title: "Semesteroppgave sok 1004"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+```{r, include=FALSE}
 load(url("https://bit.ly/2YBntjg"))
 
 library(tidyverse)
 library(gglorenz)
 library(ineq)
-
-billionaires %>%
-  ggplot(aes(TNW)) +
-  stat_lorenz(desc = FALSE) +
-  coord_fixed() +
-  geom_abline(linetype = "dashed") +
-  theme_minimal() +
-  labs(x = "Cumulative Percentage of the Top 500 Billionaires",
-       y = "Cumulative Percentage of Total Net Worth",
-       title = "Inequality Among Billionaires",
-       caption = "Source: https://www.bloomberg.com/billionaires/ (accessed February 8, 2018)")
-
+```
+## Oppgave A
+```{r}
 inntekt <- skattetall %>%
   arrange(inntekt)
 
@@ -38,12 +42,13 @@ tibble(
   "inntekt" = mean(skattetall$inntekt),
   "Befolkning" = c(befolkning$n)
 )
-# oppgave b)
-# bruk koden recode, eller if else
-# summerise per gruppe
-
+```
+Vi ser på grafen for gini indeksen over inntekt i Troms fylke fra 2015, at den var på 0.45. Vi kan se at kurven begynner helt flat på grunn av at flere av observasjonene mangler inntekt. Mange av disse er i aldersgruppen 0-20, hvor de fleste i denne alderen ikke er i jobb.
+## Oppgave B
+```{r}
 skattetall1 <- skattetall %>% 
   mutate(kommune=kommnr)
+
 skattetall1 <- skattetall1 %>% 
   mutate(kommune=recode(kommune,
                         "1902" = "Tromsø",
@@ -69,17 +74,10 @@ tibble(
   "Inntekt" = c(inntekt$`mean(inntekt)`),
   "Personer" = c(befolkning$n),
   "Andel (%)" = c(pros_bef$percent))
+```
 
-# oppgave c)
-# bruk funksjonen mutate. lag ny variabel
-#fjerne alle negative tall, og sette de som 0
-#Mange økonomer mener at det blir mer riktig å beregne Gini på disponibel inntekt
-#dvs inntekt fratrukket skatt. Beregn denne størrelsen.
-#Dersom skatt er større enn inntekt vil disponibel inntekt bli negativ.
-#Sett alle negative verdier lik 0. Lag en Lorenz-kurve for disponibel inntekt i
-#Troms i 2015 der Gini indeksen vises i figuren. Kommenter dine funn,
-#og sammenlign dem med det du fant i a).
-
+## Oppgave C
+```{r}
 skattetall1 <- skattetall1 %>% 
   mutate(disponibel_inntekt=inntekt-skatt) 
 skattetall1[skattetall1 < 0] <- 0
@@ -97,10 +95,10 @@ disponibel_inntekt %>%
        y = "Disponibel inntekt",
        title= "Gini for inntekt i Troms (2015)") +
   annotate_ineq(disponibel_inntekt$disponibel_inntekt)
+```
 
-# oppgave d)
-#ggplot. geompoint. tenke over hvordan plottet blir til slutt. (oversiktelig)
-
+## Oppgave D
+```{r}
 inntekt <- skattetall %>%
   arrange(inntekt)
 
@@ -113,10 +111,9 @@ inntekt %>%
        x="Skatt",
        y="Inntekt") +
   theme_bw()
-
-# oppgave e)
-# ggplot
-
+```
+## Oppgave E
+```{r}
 Formue <- skattetall %>%
   arrange(formue)
 
@@ -129,9 +126,9 @@ Formue %>%
        x="Skatt",
        y="Formue") +
   theme_bw()
-
-# oppgave f)
-
+```
+## Oppgave F
+```{r}
 tromso <- skattetall %>%
   filter(kommnr==1902)
 harstad <- skattetall %>% 
@@ -143,6 +140,7 @@ for_omegn <- mean(omegn$formue)
 for_tromso <- mean(tromso$formue)
 for_harstad <- mean(harstad$formue)
 for_troms <- mean(skattetall$formue)
+
 gini_for_omegn <- ineq(omegn$formue)
 gini_for_tromso <- ineq(tromso$formue)
 gini_for_harstad <- ineq(harstad$formue)
@@ -162,17 +160,16 @@ pros_total <- personer %>%
   group_by(n) %>% 
   summarise(percent = 100*n()/nrow(personer))
 tibble(
-  "kommune" = c("Harstad", "Tromsø", "Omegn", "Troms"),
-  "Gini (%)" = c(gini_for_harstad*100, gini_for_tromso*100, gini_for_omegn*100, gini_for_troms*100),
-  "Formue" = c(for_harstad, for_tromso, for_omegn, for_troms),
-  "Personer" = c(per_tromso$n, per_harstad$n, per_omegn$n, personer$n),
+  "kommune" = c("Harstad","Omegn", "Tromsø", "Troms"),
+  "Gini (%)" = c(gini_for_harstad*100, gini_for_omegn*100, gini_for_tromso*100, gini_for_troms*100),
+  "Formue" = c(for_harstad, for_omegn, for_tromso, for_troms),
+  "Personer" = c(per_harstad$n, per_omegn$n, per_tromso$n, personer$n),
   "Andel (%)" = c(pros_bef$percent, pros_total$percent))
+```
 
 
-# Oppgacve g)
-# variabel aldersgruppe. beregne gini per aldersgruppe. lage et plott med gini per aldersgruppe. 
-# 1. bruke groupe by. 2. summerise
-
+## Oppgave G
+```{r}
 aldersgruppe <- skattetall %>% 
   group_by(aldersgruppe) %>% 
   summarise(gini_aldersgruppe=ineq(inntekt))
@@ -185,9 +182,9 @@ aldersgruppe %>%
        x="Aldersgruppe",
        y="Gini") +
   theme_bw()
-
-# Oppgave h)
-
+```
+## Oppgave H
+```{r}
 Menn <- skattetall %>%
   filter(kjonn=="M")
 Kvinner <- skattetall %>% 
@@ -209,5 +206,5 @@ ggplot(NULL, aes(x= aldersgruppe, y=gini_aldersgruppe)) +
   labs(title="Gini & Aldersgruppe",
        x="Aldersgruppe",
        y="Gini")
-
+```
 
